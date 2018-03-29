@@ -1,0 +1,11 @@
+- It would be better to implement authentication into application. With this feature, only authorized people
+  would have access to perform the actions;
+  
+- Add application to Swagger; 
+ 
+- Database integration;
+
+- Implement DAO to persist data on database;
+
+- getAccount response should return a BAD_REQUEST status instead an empty response when accountId specified
+  does not exist;  
