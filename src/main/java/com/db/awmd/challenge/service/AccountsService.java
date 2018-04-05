@@ -40,13 +40,21 @@ public class AccountsService {
   }
 
   public void  transferAmountBetweenAccounts(String fromAccountId, String toAccountId, BigDecimal amount)
-          throws NonexistentAccountException, SameAccountException, NegativeAmountException, NegativeBalanceException{
+          throws NonexistentAccountException, NegativeAmountException, SameAccountException, NegativeBalanceException{
     Account fromAccount = this.accountsRepository.getAccount(fromAccountId);
     Account toAccount =  this.accountsRepository.getAccount(toAccountId);
 
+    //Checks if accounts exist. Else, an exception will be returned
     if ((fromAccount == null) || (toAccount == null)) {
       throw new NonexistentAccountException();
+      //Checks if amount specified is greater than zero. Else, an exception will be returned
+    } else if (amount.signum() < 0) {
+      throw new NegativeAmountException();
+      //Checks if accounts specified are equal. If so, an exception will be returned
+    } else if (fromAccount.equals(toAccount)) {
+      throw new SameAccountException();
     }
+
 
     List<Account> accountsList = new ArrayList<>();
     accountsList.add(fromAccount);
@@ -56,16 +64,14 @@ public class AccountsService {
 
     synchronized (accountsList.get(0)) {
       synchronized (accountsList.get(1)) {
-        if (fromAccount.equals(toAccount)) {
-          throw new SameAccountException();
-        } else if (amount.signum() < 0) {
-          throw new NegativeAmountException();
-        } else if (fromAccount.getBalance().subtract(amount).signum() < 0) {
+        //Checks the balance which source account will have after transaction. amount can't be negative as overdraft is not allowed
+        if (fromAccount.getBalance().subtract(amount).signum() < 0) {
           throw new NegativeBalanceException(fromAccount.getAccountId());
         }
 
         fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
         toAccount.setBalance(toAccount.getBalance().add(amount));
+        //Send notifications to accounts owners
         notificationService.notifyAboutTransfer(fromAccount, "$ " + amount.toString() + " were transferred from your account to account "
                 + toAccount.getAccountId() + ". Now you have a balance of $ " + fromAccount.getBalance().toString());
         notificationService.notifyAboutTransfer(toAccount, "$ " + amount.toString() + " were transferred to your account from account "

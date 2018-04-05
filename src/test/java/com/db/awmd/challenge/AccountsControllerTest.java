@@ -10,11 +10,14 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 import com.db.awmd.challenge.domain.Account;
 import com.db.awmd.challenge.service.AccountsService;
 import java.math.BigDecimal;
+
+import com.db.awmd.challenge.service.NotificationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -33,6 +36,9 @@ public class AccountsControllerTest {
 
   @Autowired
   private WebApplicationContext webApplicationContext;
+
+  @MockBean
+  private NotificationService notificationService;
 
   @Before
   public void prepareMockMvc() {
@@ -110,13 +116,15 @@ public class AccountsControllerTest {
     this.accountsService.createAccount(fromAccount);
     this.accountsService.createAccount(toAccount);
 
-    this.mockMvc.perform(post("/v1/accounts/Id-1/Id-2/200.00"))
+    this.mockMvc.perform(post("/v1/accounts/accountsTransfer").contentType(MediaType.APPLICATION_JSON)
+            .content("{\"from\":\"Id-1\",\"to\":\"Id-2\",\"amount\":\"200.00\"}"))
             .andExpect(status().isOk());
   }
 
   @Test
   public void transferAmountBetweenAccounts_forNonexistentAccounts() throws Exception {
-    this.mockMvc.perform(post("/v1/accounts/Id-1/Id-2/500"))
+    this.mockMvc.perform(post("/v1/accounts/accountsTransfer").contentType(MediaType.APPLICATION_JSON)
+            .content("{\"from\":\"Id-1\",\"to\":\"Id-2\",\"amount\":\"500.00\"}"))
             .andExpect(status().isBadRequest());
   }
 
@@ -125,7 +133,8 @@ public class AccountsControllerTest {
     Account account = new Account("Id-1", new BigDecimal("1000.00"));
     this.accountsService.createAccount(account);
 
-    this.mockMvc.perform(post("/v1/accounts/Id-1/Id-1/500.50"))
+    this.mockMvc.perform(post("/v1/accounts/accountsTransfer").contentType(MediaType.APPLICATION_JSON)
+            .content("{\"from\":\"Id-1\",\"to\":\"Id-1\",\"amount\":\"500.00\"}"))
             .andExpect(status().isBadRequest());
 
   }
@@ -138,7 +147,8 @@ public class AccountsControllerTest {
     this.accountsService.createAccount(fromAccount);
     this.accountsService.createAccount(toAccount);
 
-    this.mockMvc.perform(post("/v1/accounts/Id-1/Id-2/-500.00"))
+    this.mockMvc.perform(post("/v1/accounts/accountsTransfer").contentType(MediaType.APPLICATION_JSON)
+            .content("{\"from\":\"Id-1\",\"to\":\"Id-2\",\"amount\":\"-500.00\"}"))
             .andExpect(status().isBadRequest());
   }
 
@@ -150,7 +160,8 @@ public class AccountsControllerTest {
     this.accountsService.createAccount(fromAccount);
     this.accountsService.createAccount(toAccount);
 
-    this.mockMvc.perform(post("/v1/accounts/Id-1/Id-2/1500.00"))
+    this.mockMvc.perform(post("/v1/accounts/accountsTransfer").contentType(MediaType.APPLICATION_JSON)
+            .content("{\"from\":\"Id-1\",\"to\":\"Id-2\",\"amount\":\"1500.00\"}"))
             .andExpect(status().isBadRequest());
   }
 }

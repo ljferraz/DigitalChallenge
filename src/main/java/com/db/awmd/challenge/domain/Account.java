@@ -18,7 +18,7 @@ public class Account {
 
   @NotNull
   @Min(value = 0, message = "Initial balance must be positive.")
-  private BigDecimal balance;
+  private volatile BigDecimal balance;
 
   public Account(String accountId) {
     this.accountId = accountId;

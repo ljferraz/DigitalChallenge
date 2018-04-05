@@ -7,10 +7,13 @@ import com.db.awmd.challenge.domain.Account;
 import com.db.awmd.challenge.exception.DuplicateAccountIdException;
 import com.db.awmd.challenge.service.AccountsService;
 import java.math.BigDecimal;
+
+import com.db.awmd.challenge.service.NotificationService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -19,6 +22,9 @@ public class AccountsServiceTest {
 
   @Autowired
   private AccountsService accountsService;
+
+  @MockBean
+  private NotificationService notificationService;
 
   @Test
   public void addAccount() throws Exception {
